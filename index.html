@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>紹紹家：伊豆富士孝親之旅</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Zen+Maru+Gothic:wght@500;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF8BA7', // 櫻花粉
+                        secondary: '#2C3E50', // 富士藍
+                        accent: '#FFC0CB',
+                        bg: '#F3F4F6',
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                        header: ['"Zen Maru Gothic"', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #F9FAFB; }
+        h1, h2, h3 { font-family: 'Zen Maru Gothic', sans-serif; }
+        .timeline-line { position: absolute; left: 1.25rem; top: 0; bottom: 0; width: 2px; background-color: #E5E7EB; z-index: 0; }
+        .active-tab { border-bottom: 3px solid #FF8BA7; color: #BE185D; font-weight: bold; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="text-slate-700 pb-20">
+
+    <nav class="sticky top-0 z-50 bg-white shadow-md">
+        <div class="max-w-3xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <span class="font-header text-xl text-primary font-bold"><i class="fas fa-torii-gate mr-2"></i>伊豆富士之旅</span>
+                <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">2026/2/11 - 2/17</span>
+            </div>
+            <div class="flex overflow-x-auto hide-scrollbar space-x-6 pb-2 text-sm whitespace-nowrap">
+                <button onclick="switchTab('overview')" id="tab-overview" class="tab-btn active-tab px-2 transition-colors">行程總覽</button>
+                <button onclick="switchTab('itinerary')" id="tab-itinerary" class="tab-btn px-2 transition-colors">每日行程</button>
+                <button onclick="switchTab('food')" id="tab-food" class="tab-btn px-2 transition-colors">美食地圖</button>
+                <button onclick="switchTab('hotel')" id="tab-hotel" class="tab-btn px-2 transition-colors">住宿交通</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-3xl mx-auto px-4 pt-6">
+
+        <div id="overview" class="section-content animate-fade-in">
+            <div class="bg-white rounded-2xl shadow-sm p-6 mb-6">
+                <h2 class="text-2xl font-header text-secondary mb-4 text-center">旅程亮點數據</h2>
+                <div class="relative h-64 w-full">
+                    <canvas id="tripChart"></canvas>
+                </div>
+                <div class="mt-6 grid grid-cols-2 gap-4 text-center">
+                    <div class="bg-pink-50 p-3 rounded-xl">
+                        <div class="text-2xl font-bold text-pink-600">7天</div>
+                        <div class="text-xs text-gray-500">慢活天數</div>
+                    </div>
+                    <div class="bg-blue-50 p-3 rounded-xl">
+                        <div class="text-2xl font-bold text-blue-600">3人</div>
+                        <div class="text-xs text-gray-500">幸福同行</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm p-6">
+                <h3 class="font-bold text-lg mb-4 border-l-4 border-primary pl-3">行前準備清單</h3>
+                <ul class="space-y-3">
+                    <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-3"></i><span>護照 (有效期限6個月以上)</span></li>
+                    <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-3"></i><span>VJW 入境手續 (截圖QR Code)</span></li>
+                    <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-3"></i><span>禦寒衣物 (洋蔥式穿法)</span></li>
+                    <li class="flex items-center"><i class="fas fa-check-circle text-green-500 mr-3"></i><span>個人常備藥品</span></li>
+                    <li class="flex items-center"><i class="fas fa-camera text-primary mr-3"></i><span>攝影器材 (Fuji XF 16-55mm)</span></li>
+                </ul>
+            </div>
+        </div>
+
+        <div id="itinerary" class="section-content hidden">
+            <div class="day-block mb-8">
+                <div class="sticky top-28 bg-bg z-10 py-2 mb-2">
+                    <h2 class="text-xl font-header font-bold text-secondary flex items-center">
+                        <span class="bg-secondary text-white text-sm px-3 py-1 rounded-full mr-3">Day 1</span>
+                        2/11 (三) 橫濱港灣
+                    </h2>
+                </div>
+                <div class="relative pl-4">
+                    <div class="timeline-line"></div>
+                    <div class="relative pl-8 pb-8 group">
+                        <div class="absolute left-0 top-1 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center z-10 group-hover:bg-blue-200 transition">
+                            <i class="fas fa-plane text-blue-600"></i>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex justify-between mb-1">
+                                <span class="font-bold text-lg text-slate-800">抵達東京成田</span>
+                                <span class="text-sm text-primary font-bold">10:35</span>
+                            </div>
+                            <p class="text-sm text-gray-600 mb-2">TR898 航班。出關後搭乘 N'EX 成田特快直達橫濱。</p>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Narita+Airport" target="_blank" class="inline-flex items-center text-xs text-blue-500 hover:text-blue-700">
+                                <i class="fas fa-map-marker-alt mr-1"></i> 打開地圖
+                            </a>
+                        </div>
+                    </div>
+                    <div class="relative pl-8 pb-8 group">
+                        <div class="absolute left-0 top-1 w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center z-10">
+                            <i class="fas fa-utensils text-orange-600"></i>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex justify-between mb-1">
+                                <span class="font-bold text-lg text-slate-800">午餐：橫濱中華街</span>
+                                <span class="text-sm text-primary font-bold">14:00</span>
+                            </div>
+                            <p class="text-sm text-gray-600">推薦萬珍樓或聘珍樓，長輩暖胃首選。</p>
+                        </div>
+                    </div>
+                    <div class="relative pl-8 pb-8 group">
+                        <div class="absolute left-0 top-1 w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center z-10">
+                            <i class="fas fa-camera text-primary"></i>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex justify-between mb-1">
+                                <span class="font-bold text-lg text-slate-800">橫濱纜車 & 紅磚倉庫</span>
+                                <span class="text-sm text-primary font-bold">15:30</span>
+                            </div>
+                            <p class="text-sm text-gray-600">搭 AIR CABIN 少走路看高空風景。</p>
+                            <a href="https://www.google.com/maps/search/?api=1&query=YOKOHAMA+AIR+CABIN" target="_blank" class="inline-flex items-center text-xs text-blue-500 hover:text-blue-700">
+                                <i class="fas fa-map-marker-alt mr-1"></i> 地圖
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="day-block mb-8">
+                <div class="sticky top-28 bg-bg z-10 py-2 mb-2">
+                    <h2 class="text-xl font-header font-bold text-secondary flex items-center">
+                        <span class="bg-secondary text-white text-sm px-3 py-1 rounded-full mr-3">Day 2</span>
+                        2/12 (四) 箱根絕景
+                    </h2>
+                </div>
+                <div class="relative pl-4">
+                    <div class="timeline-line"></div>
+                    <div class="relative pl-8 pb-8 group">
+                        <div class="absolute left-0 top-1 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center z-10">
+                            <i class="fas fa-suitcase text-green-600"></i>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex justify-between mb-1">
+                                <span class="font-bold text-lg text-slate-800">移動至小田原 (寄行李)</span>
+                                <span class="text-sm text-primary font-bold">09:00</span>
+                            </div>
+                            <p class="text-sm text-gray-600">搭 JR 綠色車廂。關鍵：行李寄放在小田原站。</p>
+                        </div>
+                    </div>
+                    <div class="relative pl-8 pb-8 group">
+                        <div class="absolute left-0 top-1 w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center z-10">
+                            <i class="fas fa-mountain text-purple-600"></i>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex justify-between mb-1">
+                                <span class="font-bold text-lg text-slate-800">箱根巡禮 (大湧谷/蘆之湖)</span>
+                                <span class="text-sm text-primary font-bold">12:30</span>
+                            </div>
+                            <p class="text-sm text-gray-600">黑蛋延年益壽、海賊船看水上鳥居。</p>
+                        </div>
+                    </div>
+                    <div class="relative pl-8 pb-8 group">
+                        <div class="absolute left-0 top-1 w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center z-10">
+                            <i class="fas fa-taxi text-yellow-600"></i>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex justify-between mb-1">
+                                <span class="font-bold text-lg text-slate-800">計程車回程</span>
+                                <span class="text-sm text-primary font-bold">16:30</span>
+                            </div>
+                            <p class="text-sm text-gray-600">★ 舒適大招：從元箱根直接搭計程車回小田原取行李。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="day-block mb-8">
+                <div class="sticky top-28 bg-bg z-10 py-2 mb-2">
+                    <h2 class="text-xl font-header font-bold text-secondary flex items-center">
+                        <span class="bg-secondary text-white text-sm px-3 py-1 rounded-full mr-3">Day 3</span>
+                        2/13 (五) 熱海自駕
+                    </h2>
+                </div>
+                <div class="relative pl-4">
+                    <div class="timeline-line"></div>
+                     <div class="relative pl-8 pb-8 group">
+                        <div class="absolute left-0 top-1 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center z-10">
+                            <i class="fas fa-car text-blue-600"></i>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex justify-between mb-1">
+                                <span class="font-bold text-lg text-slate-800">租車 & 十國峠</span>
+                                <span class="text-sm text-primary font-bold">10:00</span>
+                            </div>
+                            <p class="text-sm text-gray-600">熱海站取車。前往十國峠搭纜車看360度富士山。</p>
+                        </div>
+                    </div>
+                    <div class="relative pl-8 pb-8 group">
+                        <div class="absolute left-0 top-1 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center z-10">
+                            <i class="fas fa-tree text-green-600"></i>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex justify-between mb-1">
+                                <span class="font-bold text-lg text-slate-800">修善寺溫泉</span>
+                                <span class="text-sm text-primary font-bold">15:00</span>
+                            </div>
+                            <p class="text-sm text-gray-600">竹林小徑散步，入住「宙 SORA」渡月莊金龍。</p>
+                            <a href="https://www.google.com/maps/search/?api=1&query=Shuzenji+Onsen" target="_blank" class="inline-flex items-center text-xs text-blue-500 hover:text-blue-700">
+                                <i class="fas fa-map-marker-alt mr-1"></i> 地圖
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="day-block mb-8">
+                <div class="sticky top-28 bg-bg z-10 py-2 mb-2">
+                    <h2 class="text-xl font-header font-bold text-secondary flex items-center">
+                        <span class="bg-secondary text-white text-sm px-3 py-1 rounded-full mr-3">Day 4</span>
+                        2/14 (六) 河津櫻
+                    </h2>
+                </div>
+                <div class="relative pl-4">
+                    <div class="timeline-line"></div>
+                     <div class="relative pl-8 pb-8 group">
+                        <div class="absolute left-0 top-1 w-10 h-10 bg-pink-100 rounded-full flex items-center justify-center z-10">
+                            <i class="fas fa-clock text-pink-600"></i>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border-l-4 border-pink-400">
+                            <div class="flex justify-between mb-1">
+                                <span class="font-bold text-lg text-slate-800">早起出發！</span>
+                                <span class="text-sm text-primary font-bold">08:30</span>
+                            </div>
+                            <p class="text-sm text-gray-600">週六人多，務必早出發避開塞車。</p>
+                        </div>
+                    </div>
+                     <div class="relative pl-8 pb-8 group">
+                        <div class="absolute left-0 top-1 w-10 h-10 bg-pink-200 rounded-full flex items-center justify-center z-10">
+                            <i class="fas fa-seedling text-pink-700"></i>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex justify-between mb-1">
+                                <span class="font-bold text-lg text-slate-800">河津櫻祭典</span>
+                                <span class="text-sm text-primary font-bold">09:30</span>
+                            </div>
+                            <p class="text-sm text-gray-600">重點：油菜花(黃) + 櫻花(粉) 合影。使用 XF 33mm F1.4。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="day-block mb-8">
+                <div class="sticky top-28 bg-bg z-10 py-2 mb-2">
+                    <h2 class="text-xl font-header font-bold text-secondary flex items-center">
+                        <span class="bg-secondary text-white text-sm px-3 py-1 rounded-full mr-3">Day 5</span>
+                        2/15 (日) 高原與神木
+                    </h2>
+                </div>
+                <div class="relative pl-4">
+                    <div class="timeline-line"></div>
+                     <div class="relative pl-8 pb-8 group">
+                        <div class="absolute left-0 top-1 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center z-10">
+                            <i class="fas fa-mountain text-green-600"></i>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex justify-between mb-1">
+                                <span class="font-bold text-lg text-slate-800">大室山纜車</span>
+                                <span class="text-sm text-primary font-bold">10:40</span>
+                            </div>
+                            <p class="text-sm text-gray-600">抹茶布丁山，火山口步道平坦好走。</p>
+                        </div>
+                    </div>
+                     <div class="relative pl-8 pb-8 group">
+                        <div class="absolute left-0 top-1 w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center z-10">
+                            <i class="fas fa-moon text-purple-600"></i>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex justify-between mb-1">
+                                <span class="font-bold text-lg text-slate-800">來宮神社 點燈</span>
+                                <span class="text-sm text-primary font-bold">20:00</span>
+                            </div>
+                            <p class="text-sm text-gray-600">夜訪2000年大楠樹，還車後搭計程車前往。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="day-block mb-8">
+                <div class="sticky top-28 bg-bg z-10 py-2 mb-2">
+                    <h2 class="text-xl font-header font-bold text-secondary flex items-center">
+                        <span class="bg-secondary text-white text-sm px-3 py-1 rounded-full mr-3">Day 6</span>
+                        2/16 (一) 梅花與美食
+                    </h2>
+                </div>
+                <div class="relative pl-4">
+                    <div class="timeline-line"></div>
+                     <div class="relative pl-8 pb-8 group">
+                        <div class="absolute left-0 top-1 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center z-10">
+                            <i class="fas fa-flower text-red-600"></i>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex justify-between mb-1">
+                                <span class="font-bold text-lg text-slate-800">熱海梅園 (梅花祭)</span>
+                                <span class="text-sm text-primary font-bold">09:30</span>
+                            </div>
+                            <p class="text-sm text-gray-600">2月中旬滿開，熱海必看絕景。</p>
+                        </div>
+                    </div>
+                     <div class="relative pl-8 pb-8 group">
+                        <div class="absolute left-0 top-1 w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center z-10">
+                            <i class="fas fa-drumstick-bite text-orange-600"></i>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex justify-between mb-1">
+                                <span class="font-bold text-lg text-slate-800">頂級晚餐：人形町 今半</span>
+                                <span class="text-sm text-primary font-bold">19:30</span>
+                            </div>
+                            <p class="text-sm text-gray-600">黑毛和牛壽喜燒，完美 Ending。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="day-block mb-8">
+                <div class="sticky top-28 bg-bg z-10 py-2 mb-2">
+                    <h2 class="text-xl font-header font-bold text-secondary flex items-center">
+                        <span class="bg-secondary text-white text-sm px-3 py-1 rounded-full mr-3">Day 7</span>
+                        2/17 (二) 返家
+                    </h2>
+                </div>
+                <div class="relative pl-4">
+                    <div class="timeline-line"></div>
+                     <div class="relative pl-8 pb-8 group">
+                        <div class="absolute left-0 top-1 w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center z-10">
+                            <i class="fas fa-home text-gray-600"></i>
+                        </div>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                            <div class="flex justify-between mb-1">
+                                <span class="font-bold text-lg text-slate-800">返家 (BR183)</span>
+                                <span class="text-sm text-primary font-bold">13:25</span>
+                            </div>
+                            <p class="text-sm text-gray-600">東京站搭 N'EX 前往成田。甜蜜的家。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="food" class="section-content hidden">
+            <div class="mb-6 flex space-x-2 overflow-x-auto hide-scrollbar">
+                <button onclick="filterFood('all')" class="food-filter-btn active bg-secondary text-white px-4 py-2 rounded-full text-sm font-bold shadow-sm">全部</button>
+                <button onclick="filterFood('main')" class="food-filter-btn bg-white text-gray-600 px-4 py-2 rounded-full text-sm font-bold shadow-sm border">正餐</button>
+                <button onclick="filterFood('snack')" class="food-filter-btn bg-white text-gray-600 px-4 py-2 rounded-full text-sm font-bold shadow-sm border">輕食/點心</button>
+                <button onclick="filterFood('seafood')" class="food-filter-btn bg-white text-gray-600 px-4 py-2 rounded-full text-sm font-bold shadow-sm border">海鮮</button>
+            </div>
+
+            <div id="food-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                </div>
+        </div>
+
+        <div id="hotel" class="section-content hidden">
+            <div class="space-y-4">
+                <div class="bg-white rounded-2xl p-5 shadow-sm border-l-4 border-blue-500">
+                    <h3 class="font-bold text-lg mb-2">🏨 住宿資訊</h3>
+                    <div class="space-y-4">
+                        <div class="border-b pb-2">
+                            <div class="font-bold text-slate-700">橫濱 APA Hotel & Resort</div>
+                            <div class="text-sm text-gray-500">Day 1 | 靠近馬車道站，有大浴場。</div>
+                        </div>
+                        <div class="border-b pb-2">
+                            <div class="font-bold text-slate-700">熱海 Hotel Akao</div>
+                            <div class="text-sm text-gray-500">Day 2 | 全室海景，晚上可能有煙火。</div>
+                        </div>
+                         <div class="border-b pb-2">
+                            <div class="font-bold text-slate-700">修善寺 宙 SORA</div>
+                            <div class="text-sm text-gray-500">Day 3 | 夢幻庭園與光之溫泉，孝親首選。</div>
+                        </div>
+                         <div class="border-b pb-2">
+                            <div class="font-bold text-slate-700">伊豆今井濱東急飯店</div>
+                            <div class="text-sm text-gray-500">Day 4 | 陽台直接看海賞櫻。</div>
+                        </div>
+                         <div class="border-b pb-2">
+                            <div class="font-bold text-slate-700">東京車站飯店</div>
+                            <div class="text-sm text-gray-500">Day 6 | 就在車站樓上，交通無敵。</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 shadow-sm border-l-4 border-yellow-500">
+                    <h3 class="font-bold text-lg mb-2">🚗 租車資訊</h3>
+                    <p class="text-sm text-gray-600 mb-2"><strong>時間：</strong>2/13 10:00 - 2/15 16:30 (熱海站)</p>
+                    <p class="text-sm text-gray-600 mb-2"><strong>車型：</strong>Toyota Crown 或 Alphard</p>
+                    <p class="text-sm text-gray-600"><strong>備註：</strong>已預約 ETC 卡與雪胎 (Snow Tires)。</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="mt-12 py-6 text-center text-gray-400 text-xs">
+        <p>Designed with ❤️ by 紹紹</p>
+    </footer>
+
+    <script>
+        // --- 1. Tab Switching Logic ---
+        function switchTab(tabId) {
+            // Hide all sections
+            document.querySelectorAll('.section-content').forEach(el => {
+                el.classList.add('hidden');
+            });
+            // Show selected section
+            document.getElementById(tabId).classList.remove('hidden');
+
+            // Update Tab Styles
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active-tab', 'text-primary');
+                btn.classList.add('text-gray-500');
+            });
+            const activeBtn = document.getElementById('tab-' + tabId);
+            activeBtn.classList.add('active-tab');
+            activeBtn.classList.remove('text-gray-500');
+
+            // Special handling for chart redraw
+            if (tabId === 'overview') {
+                renderChart();
+            }
+        }
+
+        // --- 2. Chart.js Logic ---
+        let tripChart = null;
+        function renderChart() {
+            const ctx = document.getElementById('tripChart').getContext('2d');
+            if (tripChart) return; // Prevent re-rendering
+
+            tripChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['溫泉放鬆', '風景攝影', '美食享樂', '交通移動'],
+                    datasets: [{
+                        data: [40, 30, 20, 10],
+                        backgroundColor: [
+                            '#FF8BA7', // Pink
+                            '#2C3E50', // Dark Blue
+                            '#FBBF24', // Amber
+                            '#9CA3AF'  // Gray
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { font: { family: "'Noto Sans TC', sans-serif" } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- 3. Food Data & Filtering Logic ---
+        const foodData = [
+            { name: "三島 櫻家", type: "seafood", desc: "百年鰻魚飯名店", location: "三島", lat: "mishima+sakuraya" },
+            { name: "敘敘苑 遊玄亭", type: "main", desc: "頂級燒肉午餐", location: "東京", lat: "jojoen" },
+            { name: "人形町 今半", type: "main", desc: "黑毛和牛壽喜燒", location: "東京", lat: "ningyocho+imahan" },
+            { name: "德造丸 本店", type: "seafood", desc: "金目鯛煮付", location: "伊豆", lat: "tokuzomaru" },
+            { name: "Hatsuhana", type: "main", desc: "自然薯蕎麥麵", location: "箱根", lat: "hatsuhana+hakone" },
+            { name: "伊豆高原啤酒", type: "seafood", desc: "浮誇漁師海鮮丼", location: "伊豆高原", lat: "izu+kogen+beer" },
+            { name: "熱海布丁", type: "snack", desc: "超人氣排隊甜點", location: "熱海", lat: "atami+pudding" },
+            { name: "大湧谷黑蛋", type: "snack", desc: "延年益壽黑雞蛋", location: "箱根", lat: "owakudani" },
+        ];
+
+        function renderFood(filterType) {
+            const grid = document.getElementById('food-grid');
+            grid.innerHTML = ''; // Clear
+
+            const filtered = filterType === 'all' 
+                ? foodData 
+                : foodData.filter(item => {
+                    if (filterType === 'main') return item.type === 'main';
+                    if (filterType === 'seafood') return item.type === 'seafood';
+                    if (filterType === 'snack') return item.type === 'snack';
+                });
+
+            filtered.forEach(item => {
+                let badgeColor = 'bg-gray-100 text-gray-600';
+                let typeText = '其他';
+                if(item.type === 'main') { badgeColor = 'bg-blue-100 text-blue-600'; typeText = '正餐'; }
+                if(item.type === 'seafood') { badgeColor = 'bg-cyan-100 text-cyan-600'; typeText = '海鮮'; }
+                if(item.type === 'snack') { badgeColor = 'bg-pink-100 text-pink-600'; typeText = '甜點'; }
+
+                const card = `
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center animate-fade-in">
+                        <div>
+                            <div class="flex items-center mb-1">
+                                <span class="font-bold text-lg mr-2">${item.name}</span>
+                                <span class="text-xs px-2 py-0.5 rounded-full ${badgeColor}">${typeText}</span>
+                            </div>
+                            <p class="text-sm text-gray-500"><i class="fas fa-map-marker-alt text-xs mr-1"></i>${item.location} · ${item.desc}</p>
+                        </div>
+                        <a href="https://www.google.com/maps/search/?api=1&query=${item.lat}" target="_blank" class="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-blue-500 hover:bg-blue-100 transition">
+                            <i class="fas fa-location-arrow"></i>
+                        </a>
+                    </div>
+                `;
+                grid.innerHTML += card;
+            });
+        }
+
+        function filterFood(type) {
+            // Update Buttons
+            document.querySelectorAll('.food-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-secondary', 'text-white');
+                btn.classList.add('bg-white', 'text-gray-600');
+            });
+            event.target.classList.remove('bg-white', 'text-gray-600');
+            event.target.classList.add('bg-secondary', 'text-white');
+            
+            renderFood(type);
+        }
+
+        // --- Init ---
+        window.onload = function() {
+            renderChart();
+            renderFood('all');
+        }
+    </script>
+</body>
+</html>
